@@ -1,0 +1,593 @@
+path {
+    stroke: blue;
+    stroke-opacity:0.5;
+}
+
+circle {
+    stroke: white;
+    fill: red;
+    stroke-width: 1;
+}
+
+g:hover > circle {
+    stroke: blue;
+}
+
+g> .order0{
+    fill:black;
+}
+g > .order1 {
+    fill: black;
+}
+g > .order2 {
+    fill: black;
+}
+
+g > text:hover {
+    fill: red;
+}
+g>text{
+    font-size:medium;
+}
+
+image {
+    transition: 0.3s;
+}
+
+/*#graph {
+    margin: 4px, 4px;
+    padding: 4px;
+    border: 1px solid black;
+    float: left;
+    resize: both;
+    overflow: auto;
+}
+    #graph > div {
+        margin: 4px, 4px;
+        padding: 4px;
+        background-color: white;
+            overflow-x: hidden;
+overflow-y: auto;
+                overflow: auto;
+        text-align: justify;
+        float: left;
+        resize: both;
+        padding: 4px;
+        border: 1px solid black;
+    }*/
+/*.graph {*/
+    /*    margin: 4px, 4px;
+    padding: 4px;*/
+    /*    background-color: white;*/
+    /*    overflow-x: hidden;
+    overflow-y: auto;*/
+    /*overflow: auto;*/
+    /*    text-align: justify;*/
+    /*  float: left;*/
+    /*    resize: both;
+    padding: 4px;*/
+    /*display: flex;*/
+    /*    flex: 1 1 auto;*/
+    /*flex-flow: column;*/
+    /*display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    border: 1px solid black;
+}*/
+.bar {
+    overflow: auto;
+    background-color: white;
+    /*    border: 1px solid black;*/
+}
+.bar  div {
+    /*float: left;*/
+    margin: 1px;
+    background-color: white;
+    display: inline-block;
+}
+.bar  button {
+    border: none;
+    padding: 6px 16px;
+    text-align: center;
+    display: inline-block;
+    font-size: 18px;
+    vertical-align: middle;
+    background-color: white;
+}
+.bar  button:hover {
+    background-color: #e7e7e7;
+    color: red;
+}
+.bar  button:disabled {
+    color: #e7e7e7;
+    background-color: white;
+}
+.bar  input[type=checkbox]{
+    display: inline-block;
+    vertical-align: middle;
+    /*margin-top: 10px;*/
+/*        width:15px;
+    height:15px;*/
+}
+.history-content {
+    box-shadow: 0px 1px 6px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    color: black;
+    padding: 0px 5px;
+    text-decoration: none;
+    display: none;
+    position: absolute;
+    background-color: white;
+    font-size: 14px;
+}
+.history-content > ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow:auto;
+  max-height: 200px;
+  max-width:300px;
+/*    width: 100%;*/
+}
+.history-content > ul li {
+    padding: 4px 8px;
+    /*border-bottom: 1px solid #CCC;*/
+}
+.history-content > ul li:hover {
+        background-color: #e7e7e7;
+        color: red;
+}
+/*.history-content > ul li:last-child {
+    border-bottom: 0;
+}*/
+
+.graph_content {
+    /*    margin: 4px, 4px;
+    padding: 4px;*/
+    /*    background-color: white;*/
+    /*        overflow-x: hidden;*/
+    /*overflow-y: scroll;*/
+    /*    overflow: scroll;*/
+    /*    text-align: justify;*/
+    /*  float: left;*/
+    /*    resize: both;
+    padding: 4px;*/
+    /*display: flex;*/
+    /*    flex: 1 1 auto;*/
+    /*flex-flow: column;*/
+    /*width: 100%;*/
+    /*    height:100%;*/
+    overflow: auto;
+    /*    border: 1px solid black;*/
+    text-overflow: ellipsis;
+}
+    .graph_content > svg {
+/*        overflow: auto;*/
+/*        background-color: white;*/
+    }
+
+.modify {
+    overflow: auto;
+    /*    background-color: white;*/
+    /*border: 1px solid black;*/
+}
+.modify_menu {
+    overflow: auto;
+    background-color: white;
+    /*border: 1px solid black;*/
+}
+
+.modify_advanced_menu {
+    overflow: auto;
+    background-color: white;
+}
+.modify_advanced_menu > button {
+    float: left;
+    margin: 1px;
+    border: none;
+    padding: 6px 8px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    background-color: white;
+}
+
+.modify_advanced_menu > button:hover {
+    background-color: #e7e7e7;
+    color: red;
+}
+.modify_advanced_menu > button:disabled {
+    color: #e7e7e7;
+    background-color: white;
+}
+.command_chosen {
+    background-color:  #e7e7e7;/*gray;*/
+    color:red;
+}
+.command_chosen:hover{
+    background-color: #e7e7e7;/*gray;*/
+}
+.modify_simple_menu {
+    overflow: auto;
+    background-color: white;
+}
+.modify_simple_menu > button {
+    float: left;
+    margin: 1px;
+    border: none;
+    padding: 6px 8px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    background-color: white;
+}
+.modify_simple_menu > button:hover {
+    background-color: #e7e7e7;
+    color: red;
+}
+#modifying {
+    width: 98%;
+    height: 98%;
+    overflow: auto;
+    margin: 2%;
+    /*    background-color: white;*/
+    /*border: 1px solid black;*/
+}
+#modifying textarea{
+    width: 95%;
+    height: 400px;
+    font-size: 16px;
+    /*   background: #495C70;*/
+    padding: 1% 1% 1% 1%;
+    border: 1px solid #53687E;
+    margin: 1%;
+    overflow: auto;
+    background: transparent;
+}
+
+/*#modify_form input[type="checkbox"] {
+    -webkit-appearance: initial;
+    appearance: initial;*/
+    /*        background: gray;*/
+    /*width: 18px;
+    height: 18px;
+    border: 0.5px solid gray;
+    position: relative;
+}
+#modify_form input[type="checkbox"]:checked {
+    background: red;
+}
+#modify_form input[type="checkbox"]:checked:after {*/
+    /* Heres your symbol replacement */
+    /*content: "x";*/
+/*    color: #fff;*/
+    /* The following positions my tick in the center, 
+     * but you could just overlay the entire box
+     * with a full after element with a background if you want to */
+    /*position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%,-50%);
+    -moz-transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);*/
+    /*
+     * If you want to fully change the check appearance, use the following:
+     * content: " ";
+     * width: 100%;
+     * height: 100%;
+     * background: blue;
+     * top: 0;
+     * left: 0;
+     
+}*/
+/*h2 {
+    font: 14px arial, sans-serif;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+
+html, body {
+    height: 100%;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+#wrapper {
+    height: 100%;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+#menucontainer {
+    width: 20%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #222;
+}
+
+    #menucontainer li {
+        border-bottom: 1px solid #000;
+        border-top: 1px solid #333;
+        cursor: pointer;
+        padding: 10px 5px;
+        color: #bbb;
+        background: #1a1a1a;
+        font: 12px arial, sans-serif;
+    }
+
+        #menucontainer li:hover {
+            background: #111;
+            color: #ccc;
+        }
+
+#layoutcontainer {
+    width: 80%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 20%;
+    box-shadow: -3px 0px 9px 0px rgba( 0, 0, 0, 0.4 );
+}*/
+body .lm_content {
+    /*    overflow: scroll;*/
+}
+/*// Make the drag handles a little narrower for easier scrolling
+.lm_splitter.lm_vertical .lm_drag_handle {
+    height: 15px;
+}
+
+.lm_splitter.lm_horizontal .lm_drag_handle {
+    width: 15px;
+}*/
+
+
+
+
+
+.modify_form {
+    /*width: 96%;*/
+    /*font-size: 16px;*/
+    /*   background: #495C70;*/
+    /*padding: 30px 30px 15px 30px;*/
+    /*border: 1px solid #53687E;
+    width: 96%;
+    height: 400px;
+    overflow: auto;
+    margin: 1%;
+    background: transparent;*/
+    width: 95%;
+    height: 400px;
+    font-size: 16px;
+    /*   background: #495C70;*/
+    padding: 1% 1% 1% 1%;
+    border: 1px solid #53687E;
+    margin: 1%;
+    overflow: auto;
+    background: transparent;
+}
+
+.modify_form div{
+    /*border-bottom: 1px dashed #53687E;*/
+    overflow: auto;
+    margin:2px;
+    padding: 1% 1% 1% 1%;
+}
+.modify_form .form_entry{
+    border:1px solid #53687E;
+}
+
+.modify_form input[type=submit]
+{
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 16px;
+    color: black;
+}
+.modify_form input[type=button],
+.modify_form input[type=text],
+.modify_form input[type=email],
+.modify_form textarea,
+.modify_form label
+{
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 16px;
+/*    color: #fff;*/
+
+}
+.modify_form label {
+    display:block;
+    margin-bottom: 10px;
+}
+.modify_form label > span{
+    display: inline-block;
+    float: left;
+    /*width: 300px;*/
+}
+.modify_form input[type=text],
+.modify_form input[type=email],
+.modify_form input[type=date] 
+{
+    background: transparent;
+    border: none;
+    /*border-bottom: 1px dashed #83A4C5;*/
+    border-bottom: 1px solid #83A4C5;
+    /*width: 300px;*/
+    width: 100%;
+    outline: none;
+    /*font-style: italic;*/
+    float:right;
+}
+.modify_form .left
+{
+    background: transparent;
+    border: none;
+/*    border-bottom: 1px dashed #83A4C5;*/
+    /*border-bottom: 1px solid #83A4C5;*/
+/*    width: 300px;*/
+    width: 10%;
+    padding:1%;
+    outline: none;
+/*    font-style: italic;*/
+    float:left;
+}
+
+.modify_form .right
+{
+    background: transparent;
+    border: none;
+/*    border-bottom: 1px dashed #83A4C5;*/
+    /*border-bottom: 1px solid #83A4C5;*/
+/*    width: 300px;*/
+    width: 80%;
+    padding:1%;
+    outline: none;
+/*    font-style: italic;*/
+    float:right;
+}
+
+.modify_form textarea{
+    font-style: italic;
+    padding: 0px 0px 0px 0px;
+    background: transparent;
+    outline: none;
+    border: none;
+/*    border-bottom: 1px dashed #83A4C5;*/
+    border-bottom: 1px solid #83A4C5;
+    width: 275px;
+    overflow: hidden;
+    resize:none;
+    height:20px;
+}
+
+
+.modify_form textarea:focus, 
+.modify_form input[type=text]:focus,
+.modify_form input[type=email] :focus
+{
+/*    border-bottom: 1px dashed #D9FFA9;*/
+    border-bottom: 2px solid #83A4C5;
+    color:red;
+}
+
+.modify_form input[type=submit],
+.modify_form input[type=button]{
+  /*  background: #576E86;*/
+    background: #82CAFA;
+    border: none;
+    padding: 8px 10px 8px 10px;
+    border-radius: 5px;
+/*    color: #A8BACE;*/
+}
+.modify_form input[type=submit]:hover,
+.modify_form input[type=button]:hover{
+background: #394D61;
+}
+
+
+
+.form-check-input {
+  width: 1em;
+  height: 1em;
+  margin-top: 0.25em;
+  vertical-align: top;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-print-color-adjust: exact;
+  color-adjust: exact;
+  print-color-adjust: exact;
+}
+.form-check-input[type=checkbox] {
+  border-radius: 0.25em;
+}
+.form-check-input[type=radio] {
+  border-radius: 50%;
+}
+.form-check-input:active {
+  filter: brightness(90%);
+}
+.form-check-input:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.form-check-input:checked {
+/*  background-color: #0d6efd;*/
+/*  border-color: #0d6efd;*/
+  background-color: cornflowerblue;
+  border-color: cornflowerblue;
+}
+.form-check-input:checked[type=checkbox] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+.form-check-input:checked[type=radio] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e");
+}
+.form-check-input[type=checkbox]:indeterminate {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+}
+.form-check-input:disabled {
+  pointer-events: none;
+  filter: none;
+  opacity: 0.5;
+}
+.form-check-input[disabled] ~ .form-check-label, .form-check-input:disabled ~ .form-check-label {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.form-switch {
+  padding-left: 2.5em;
+}
+.form-switch .form-check-input {
+  width: 2em;
+  margin-left: -2.5em;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
+  background-position: left center;
+  border-radius: 2em;
+  transition: background-position 0.15s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .form-switch .form-check-input {
+    transition: none;
+  }
+}
+.form-switch .form-check-input:focus {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2386b7fe'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+  background-position: right center;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+
+.connected {
+    color: blueviolet;
+}
+
+.disconnected {
+    color: #e7e7e7;
+}
+
+
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
