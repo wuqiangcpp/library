@@ -8,19 +8,33 @@ std::wstring exePath() {
     std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
     return std::wstring(buffer).substr(0, pos);
 }
-HRESULT  browseToFile(LPCTSTR filename)
+
+std::wstring string2wstring(const std::string &str)
 {
-    int fail = S_OK; // start as 0
-    fail = fail || CoInitialize(NULL);
-    ITEMIDLIST* pidl = ILCreateFromPath(filename);
-    if (pidl) {
-        fail = fail || SHOpenFolderAndSelectItems(pidl, 0, 0, 0);
-        ILFree(pidl);
-        return fail;
-    }
-    else {
-        return E_FAIL;
-    }
+    int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), NULL, 0);
+    LPTSTR wstr = new TCHAR[len + 1];
+    MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), wstr, len);
+    wstr[len] = '\0';
+    return std::wstring(wstr);
+}
+
+HRESULT  browseToFile(std::string filename)
+{
+    //int fail = S_OK; // start as 0
+    //fail = fail || CoInitialize(NULL);
+    //ITEMIDLIST* pidl = ILCreateFromPath(string2wstring(filename).c_str());
+    //if (pidl) {
+    //    fail = fail || SHOpenFolderAndSelectItems(pidl, 0, 0, 0);
+    //    ILFree(pidl);
+    //    return fail;
+    //}
+    //else {
+    //    return E_FAIL;
+    //}
+    std::wstring strSel = L"/select,\"";
+    strSel += string2wstring(filename);
+    strSel += L"\"";
+    ShellExecute(GetDesktopWindow(), L"open",L"explorer.exe",strSel.c_str(), NULL, SW_SHOWNORMAL);
 }
 
 void openFile(const std::wstring&file) {

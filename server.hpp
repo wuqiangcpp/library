@@ -8,6 +8,8 @@
 #include<functional>
 #include"util.hpp"
 
+#include"win_system.hpp"
+
 typedef websocketpp::server<websocketpp::config::asio> server;
 
 using websocketpp::lib::placeholders::_1;
@@ -151,6 +153,19 @@ Json::Value save(const Json::Value& json) {
     return Json::nullValue;
 }
 
+Json::Value openExternal(const Json::Value& json) {
+    try {
+        const Json::Value& args = json["args"];
+        browseToFile(args[0].asString());
+    }
+    catch (const Json::Exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    return Json::nullValue;
+}
+
+
 void register_handlers() {
     msg_handlers[std::string("getRelations")] = handler_fun(getRelations);
     msg_handlers[std::string("removeNodes")] = handler_fun(removeNodes);
@@ -161,6 +176,7 @@ void register_handlers() {
     msg_handlers[std::string("combo")] = handler_fun(combo);
     msg_handlers[std::string("save")] = handler_fun(save);
     msg_handlers[std::string("setInfo")] = handler_fun(setInfo);
+    msg_handlers[std::string("openExternal")] = handler_fun(openExternal);
 }
 
 

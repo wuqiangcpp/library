@@ -40,8 +40,6 @@ int main()
     std::wstring file =exePath()+ std::wstring(L"\\client\\client.html");
     openFile(file);
 
-
-
     runServer();
     return 0;
 }

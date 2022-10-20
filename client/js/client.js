@@ -755,12 +755,46 @@ function showNodeHeader(node, header_height) {
 
 
     node.append("image")
+        .attr('href', 'img/folder.svg')
+        //.attr('href', '#icon-copy')
+        .attr('width', image_size)
+        .attr('height', image_size)
+        //.append('text')
+        .attr("x", d => {
+            var header_x = d.header_x;
+            if (d.file) {
+                d.header_x += image_size + padding;
+            }
+            return header_x;
+        })
+        //.attr("y", -20)
+        //.text("c")
+        .on('click', function () {
+            var node = d3.select(this).data()[0];
+            ws.send(JSON.stringify({ name: 'openExternal', args: [node.file] }));
+        })
+        .on('mouseover', function () {
+            d3.select(this).style('transform', 'scale(1.2)');
+        })
+        .on('mouseleave', function () {
+            d3.select(this).style('transform', 'scale(1)');
+        })
+        .append("title").text("open external")
+
+
+    node.append("image")
         .attr('href', 'img/copy.svg')
         //.attr('href', '#icon-copy')
         .attr('width', image_size)
         .attr('height', image_size)
         //.append('text')
-        .attr("x", d => d.header_x)
+        .attr("x", d => {
+            var header_x = d.header_x;
+            if (d.file) {
+                d.header_x += image_size + padding;
+            }
+            return header_x;
+        })
         //.attr("y", -20)
         //.text("c")
         .on('click', function () {
@@ -918,7 +952,7 @@ function drawSvg(div, data, width, height, margin, opt) {
     drag = simulation => {
 
         function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
+            if (!event.active) simulation.alphaTarget(0.5).restart();
             d.fx = d.x;
             d.fy = d.y;
         }
@@ -940,7 +974,7 @@ function drawSvg(div, data, width, height, margin, opt) {
             .on("end", dragended);
     }
 
-    node.call(drag(simulation));
+    node.selectAll(".text").call(drag(simulation));
 }
 function graph2Table(data) {
     content = new Map();
@@ -1006,7 +1040,7 @@ function showContent(div, data, width, height, margin, opt) {
             .data(value)
             .join("dt")
         var header_height = 14;
-        var node_header = node.append("svg").attr('width', 40).attr('height', header_height);
+        var node_header = node.append("svg").attr('width', 80).attr('height', header_height);
         showNodeHeader(node_header, header_height);
         node.append("div").attr('class', 'text')
             .append("text").text(d => d.name);
@@ -1141,7 +1175,7 @@ function handle_msg(dataJson) {
         //show_modify_form(data);
         update_data('modify', data);
     }
-    if (id != 'modify') {
+    if (id != 'keys') {
         showGraph_dispatch(id, data);
         update_data(id, data);
         //document.getElementById("show").innerHTML = received_msg;
@@ -1165,7 +1199,7 @@ if ("WebSocket" in window) {
         // Web Socket 已连接上，使用 send() 方法发送数据
         //ws.send(JSON.stringify({ name: "getRelations", args: ["root", -1] }));
         getRelations(start_display_id, ["title", 1], true);
-        getRelations('modify', ["item", 1], false);
+        getRelations('keys', ["item", 1], false);
     };
 
     ws.onmessage = function (evt) {
