@@ -721,66 +721,63 @@ function showNodeHeader(node, header_height) {
             d3.select(this).style("opacity", 0.2);
         });
     var image_size = header_height*0.8;
-    var padding = 4;
-    node.append("a")
-        .attr("href", d => d.file ? d.file : "")
-        .attr("target", "_blank")
-        //.append("text")
-        //.attr("x", 8)
-        //.attr("y", "-0.5em")
-        //.text(d => d.file ? "link" : "")
-        .append("image")
-        .attr('href', d => {
-            d.header_x = 0;
-            if (d.file) {
+    var padding = 6;
+    node.each(function(item){
+        item.header_x = 0;
+        if(item.file){
+            d3.select(this).append("a")
+            .attr("href",item.file)
+            .attr("target", "_blank")
+            //.append("text")
+            //.attr("x", 8)
+            //.attr("y", "-0.5em")
+            //.text(d => d.file ? "link" : "")
+            .append("image")
+            .attr('href', d => {
                 d.header_x += image_size + padding;
                 return 'img/link.svg';
                 //return '#icon-link';
-            }
-            return '';
-        })
-        .attr('width', image_size)
-        .attr('height', image_size)
-        .on('click', function () {
-            var node = d3.select(this).data()[0];
-            navigator.clipboard.writeText(node.file);
-        })
-        .on('mouseover', function () {
-            d3.select(this).style('transform', 'scale(1.2)');
-        })
-        .on('mouseleave', function () {
-            d3.select(this).style('transform', 'scale(1)');
-        })
-        .append("title").text("open file")
+            })
+            .attr('width', image_size)
+            .attr('height', image_size)
+            .on('mouseover', function () {
+                d3.select(this).style('transform', 'scale(1.1)');
+            })
+            .on('mouseleave', function () {
+                d3.select(this).style('transform', 'scale(1)');
+            })
+            .append("title").text("open file")
+        }
+    })
 
 
-    node.append("image")
-        .attr('href', 'img/folder.svg')
-        //.attr('href', '#icon-copy')
-        .attr('width', image_size)
-        .attr('height', image_size)
-        //.append('text')
-        .attr("x", d => {
-            var header_x = d.header_x;
-            if (d.file) {
+    node.each(function(item){
+        if(item.file){
+            d3.select(this).append("image")
+            .attr('href', 'img/folder.svg')
+            //.attr('href', '#icon-copy')
+            .attr('width', image_size)
+            .attr('height', image_size)
+            //.append('text')
+            .attr("x", d => {
+                var header_x = d.header_x;
                 d.header_x += image_size + padding;
-            }
-            return header_x;
-        })
-        //.attr("y", -20)
-        //.text("c")
-        .on('click', function () {
-            var node = d3.select(this).data()[0];
-            ws.send(JSON.stringify({ name: 'openExternal', args: [node.file] }));
-        })
-        .on('mouseover', function () {
-            d3.select(this).style('transform', 'scale(1.2)');
-        })
-        .on('mouseleave', function () {
-            d3.select(this).style('transform', 'scale(1)');
-        })
-        .append("title").text("open external")
-
+                return header_x;
+            })
+            //.attr("y", -20)
+            .on('click', function () {
+                navigator.clipboard.writeText(item.file);
+                ws.send(JSON.stringify({ name: 'openExternal', args: [item.file] }));
+            })
+            .on('mouseover', function () {
+                d3.select(this).style('transform', 'scale(1.1)');
+            })
+            .on('mouseleave', function () {
+                d3.select(this).style('transform', 'scale(1)');
+            })
+            .append("title").text("open external")
+        }
+    })
 
     node.append("image")
         .attr('href', 'img/copy.svg')
@@ -790,22 +787,19 @@ function showNodeHeader(node, header_height) {
         //.append('text')
         .attr("x", d => {
             var header_x = d.header_x;
-            if (d.file) {
-                d.header_x += image_size + padding;
-            }
+            d.header_x += image_size + padding;
             return header_x;
         })
         //.attr("y", -20)
-        //.text("c")
-        .on('click', function () {
-            var node = d3.select(this).data()[0];
+        .on('click', function (d,node) {
+            //var node = d3.select(this).data()[0];
             navigator.clipboard.writeText(node.name);
             if (status == 'modifying') {
                 load_info(node);
             }
         })
         .on('mouseover', function () {
-            d3.select(this).style('transform','scale(1.2)');
+            d3.select(this).style('transform','scale(1.1)');
         })
         .on('mouseleave', function () {
             d3.select(this).style('transform', 'scale(1)');
@@ -1103,8 +1097,8 @@ function add_new_info(self) {
     var d = self.closest('.form_new_info');
     var html = d.outerHTML;
     html = `<div class='info right'>` +
-        `<div class='left'><input  type="text" value="" onfocus='save_focused()'/></div>` +
-        `<div class='right' ><input type="text" value="" onfocus='save_focused()'/></div>` +
+        `<div class='left'><input  type="text" value="" placeholder="infoKey" onfocus='save_focused()'/></div>` +
+        `<div class='right' ><input type="text" value="" placeholder="infoValue" onfocus='save_focused()'/></div>` +
         `</div>` + html;
     d.outerHTML = html;
 }
@@ -1112,8 +1106,8 @@ function add_new_info(self) {
 function add_new_item(self) {
     var d = self.closest('.form_new_item');
     var html = d.outerHTML;
-    html = `<div class='kvs'><div class='left'><input  type="text" value="" onfocus='save_focused()'/></div>` +
-        `<div class='right' ><input type="text" value="" onfocus='save_focused()'/></div></div>` + html;
+    html = `<div class='kvs'><div class='left'><input  type="text" value="" placeholder="key" onfocus='save_focused()'/></div>` +
+        `<div class='right' ><input type="text" value="" placeholder="value" onfocus='save_focused()'/></div></div>` + html;
     d.outerHTML = html;
 }
 
@@ -1496,14 +1490,28 @@ function frombib_form() {
 }
 
 function clear_form() {
-    var empty_content = [{ title: 'test' }];
-    show_modify_form(empty_content, ['title']);
+    var empty_content = [{}];
+    bib_keys.forEach(function (d){
+         empty_content[0][d]='...';
+         if(needSplit(d)){
+             empty_content[0][d]=['...'];
+         }
+    })
+    show_modify_form(empty_content, bib_keys);
     var nodes = document.getElementsByClassName('form_entry')[0].querySelectorAll('input');
     nodes.forEach(function (d) {
-        if (d.value != 'title') {
+        if(!bib_keys.includes(d.value)){
             d.value = '';
-        }
+            d.placeholder='...';
+         }
     });
+}
+
+function needSplit(key){
+   if (key == 'author'|| key=='tag') {
+         return true;
+    }
+   return false;
 }
 
 function confirm_form() {
@@ -1515,8 +1523,8 @@ function confirm_form() {
         entry.querySelectorAll('.kvs').forEach(function(d,index,a){
             var key = d.querySelectorAll('input')[0].value.trim();
             var value = d.querySelectorAll('input')[1].value.trim();
-            if (key == 'author'|| key=='tag') {
-                value = value.split('; ');
+            if (needSplit(key)) {
+                value = value.split('; ').filter(item=>item);
             }
             if (value.length != 0) {
                 if (key.length == 0) {
@@ -1567,10 +1575,15 @@ function load_info(node) {
     show_modify_form(bib_content, [""]);
 }
 
+function save(){
+   ws.send(JSON.stringify({ name: 'save', args:[]}));
+}
+
 function show_modify_simple() {
     var { form_html } = load_modify_status();
     document.getElementById('modify_simple').innerHTML = `<div class='modify_simple_menu'>
 <button id='frombib_form' onclick='frombib_form()'>frombib</button>
+<button id='save' onclick='save()'>save</button>
 </div>
 <div id='modify_form' class='modify_form'></div>
 <input type = "button" value = 'clear' onclick='clear_form()'>
