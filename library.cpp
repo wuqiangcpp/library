@@ -21,6 +21,17 @@ void Library::removeObj(const Object& obj) {
 	}
 }
 
+void Library::removeConnected(const Object& obj) {
+	Graph::vertex_set A;
+	if (!objects.count(obj)) A = {};
+	else {
+		database.dfs_search(objptr(objects.find(obj)), -1, A);
+	}
+	for (const auto& objptr : A) {
+		removeObj(*objptr);
+	}
+}
+
 Json::Value Library::jsonfy(const Graph& graph) const {
 	Json::Value json;
 	std::unordered_map<ObjectPtr, size_t> objsmap;

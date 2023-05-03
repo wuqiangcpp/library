@@ -41,6 +41,7 @@ int main()
     openFile(file);
 
     runServer();
+
     return 0;
 }
 

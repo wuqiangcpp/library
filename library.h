@@ -154,10 +154,10 @@ public:
 
 	ObjectPtr addObj(const Object& obj);
 	void removeObj(const Object& obj);
+	void removeConnected(const Object& obj);
 private:
 	Json::Value jsonfy(const Graph & graph) const;
 	void addToGraph(const Json::Value &json);
-
 
 	ObjectPtr objptr(ObjSet::const_iterator it) const {
 		return &(*it);

@@ -164,8 +164,20 @@ Json::Value openExternal(const Json::Value& json) {
     }
     return Json::nullValue;
 }
-
-
+Json::Value getFiles(const Json::Value& json) {
+    std::vector<fileInfo> files;
+    const Json::Value& args = json["args"];
+    getfiles(to_wide_string(args[0].asString()), files);
+    Json::Value return_json=Json::arrayValue;;
+    for (int i = 0; i < files.size(); i++) {
+        Json::Value node;
+        node["name"] = to_byte_string(files[i].name);
+        node["time"] = to_byte_string(files[i].time);
+        node["size"] = to_byte_string(files[i].size);
+        return_json[i] = node;
+    }
+    return return_json;
+}
 void register_handlers() {
     msg_handlers[std::string("getRelations")] = handler_fun(getRelations);
     msg_handlers[std::string("removeNodes")] = handler_fun(removeNodes);
@@ -177,6 +189,7 @@ void register_handlers() {
     msg_handlers[std::string("save")] = handler_fun(save);
     msg_handlers[std::string("setInfo")] = handler_fun(setInfo);
     msg_handlers[std::string("openExternal")] = handler_fun(openExternal);
+    msg_handlers[std::string("getFiles")] = handler_fun(getFiles);
 }
 
 

@@ -364,6 +364,7 @@ function redo(id) {
         var { item } = get_record(id);
         if (item) {
             item["status"] = { id: id };
+            item["args"][1]=depth;
             ws.send(JSON.stringify(add_id_info(id, item)));
         }
     }
@@ -595,6 +596,11 @@ function showGraph(id, data,opt) {
         bar.append("div").attr('class', 'form-switch').append("input").attr("type", "checkbox")
             .property('checked', !opt.default_is_graph).attr('class', 'form-check-input')
             .on('click', function () { redraw(id); });
+         bar.append("input").attr('class','depth').attr('type','number').attr('value',depth).attr('max',5).attr('min',-1)
+         .on('change', function () { 
+                                 depth=Number(document.getElementById(id).querySelector(".depth").value);
+                                 redo(id);
+                                 });
         if (id == start_display_id) {
             bar.append("div").append("button").attr("id","edit").html('<span class="iconfont icon-edit"></span>')
                 .on("click", function () { change_status(); });
@@ -620,6 +626,7 @@ function showGraph(id, data,opt) {
     const bar = div_graph.select(".bar");
     div.select("table").remove()
     div.select("svg").remove()
+    div.select(".control").remove()
     if (bar.select('input').property('checked'))
         showContent(div, data, width, height, margin, opt);
     else
@@ -809,6 +816,14 @@ function showNodeHeader(node, header_height) {
 
 function drawSvg(div, data, width, height, margin, opt) {
     if (deepEqual(data, {})) return;
+
+    if (div.select(".control").empty()) div.append("div").attr("class", 'control')
+
+    const control = div.select(".control");
+    control.selectAll('*').remove();
+    control.append('div').append('input').attr("class", 'strength').attr('type', 'range').attr('min', 1).attr('max', 100).attr('value', 10)
+    control.append('div').append('input').attr("class", 'charge').attr('type', 'range').attr('min', 0).attr('max', 1000).attr('value', 400);
+
     // append the svg object to the body of the page
     if (div.select("svg").empty()) div.append("svg");
 
@@ -874,15 +889,17 @@ function drawSvg(div, data, width, height, margin, opt) {
     //.attr("stroke", "white")
     //.attr("stroke-width", 3);
 
+    var strength = 1/Number(control.select('.strength').property('value'));
+    var charge = -Number(control.select('.charge').property('value'));
 
     // Let's list the force we wanna apply on the network
     var simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
         .force("link", d3.forceLink()                               // This force provides links between nodes
             .links(data.links)                                    // and this the list of links
-            .strength(0.2)
+            .strength(strength)
             .distance(0)
         )
-        .force("charge", d3.forceManyBody().strength(-400))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
+        .force("charge", d3.forceManyBody().strength(charge))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
         .force("center", d3.forceCenter(width / 2, height / 2))     // This force attracts nodes to the center of the svg area
         .alphaMin(0.1)
         .alphaDecay(0.0228)
@@ -969,6 +986,22 @@ function drawSvg(div, data, width, height, margin, opt) {
     }
 
     node.selectAll(".text").call(drag(simulation));
+    control.select('.strength').on("input", function () {
+        var strength = 1 / Number(control.select('.strength').property('value'));
+        simulation.force("link", d3.forceLink()
+            .links(data.links)                     
+            .strength(strength)
+            .distance(0)
+        )
+        simulation.alphaTarget(0.5).restart();
+        setTimeout(function () { simulation.alphaTarget(0); }, 1000);
+    });
+    control.select('.charge').on("input", function () {
+        var charge = -Number(control.select('.charge').property('value'));
+        simulation.force("charge", d3.forceManyBody().strength(charge));
+        simulation.alphaTarget(0.5).restart();
+        setTimeout(function () { simulation.alphaTarget(0); }, 1000);
+    });
 }
 function graph2Table(data) {
     content = new Map();
@@ -1179,11 +1212,6 @@ function handle_msg(dataJson) {
     }
 }
 
-
-
-
-
-
 if ("WebSocket" in window) {
     // 打开一个 web socket
     ws = new WebSocket("ws://localhost:9002");
@@ -1192,10 +1220,9 @@ if ("WebSocket" in window) {
         document.getElementById('connection').classList.add('connected');
         // Web Socket 已连接上，使用 send() 方法发送数据
         //ws.send(JSON.stringify({ name: "getRelations", args: ["root", -1] }));
-        getRelations(start_display_id, ["title", 1], true);
+        getRelations(start_display_id, ["title", Number(depth)], true);
         getRelations('keys', ["item", 1], false);
     };
-
     ws.onmessage = function (evt) {
         var received_msg = evt.data;
         var dataJson = JSON.parse(received_msg);
@@ -1217,14 +1244,12 @@ if ("WebSocket" in window) {
         //alert("连接已关闭...");
         document.getElementById('connection').classList.remove('connected');
         document.getElementById('connection').classList.add('disconnected');
-    };
+        }
 }
 else{
         // 浏览器不支持 WebSocket
     alert("您的浏览器不支持 WebSocket!");
 }
-
-
 
 function send()
 {
@@ -1232,9 +1257,8 @@ function send()
     console.log(msg);
     ws.send(msg);
 }
-function changeDepth() {
-    depth = document.getElementById("depth").value;
-    console.log(depth);
+function changeDepth(id) {
+    depth=document.getElementById("depth").value;
 }
 var command_table = {
     link: 'linkNodes', unlink: 'unlinkNodes',
@@ -1242,6 +1266,13 @@ var command_table = {
     save: "save",
     frombib: "frombib",
     setInfo:'setInfo'
+}
+var command_usage = {
+    link: 'link [obj1] [obj2]', unlink: 'unlink [obj1] [obj2]',
+    remove: 'remove [obj]', rename: "rename [obj1] [obj2]",
+    save: "save",
+    frombib: "frombib [bib]",
+    setInfo:'setInfo [obj] [key] [value]'
 }
 async function insert_after_click(command) {
     if (command == 'frombib') {
@@ -1397,7 +1428,8 @@ function show_modify_advanced(){
     var modify_advanced_menu = `<div id= 'modify_advanced_menu' class='modify_advanced_menu'>`;
     //modify_advanced_menu += `<button id='node_select' onclick='change_mode()'><span class="iconfont icon-hand"></span></button>`;//🡬
     for (var key in command_table) {
-        modify_advanced_menu += `<button id='${key}'>${key}</button>`;
+        var title= command_usage[key];
+        modify_advanced_menu += `<button id='${key}' title='${title}'>${key}</button>`;
     }
     //modify_advanced_menu += `<button id='choose_file' onclick='choose_file()'>🗎</button>`;//📁
     modify_advanced_menu += `</div>`;
