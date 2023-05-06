@@ -571,6 +571,7 @@ function showGraph_dispatch(id, data) {
 
 function absolute_path(base, relative) {
     var path = new URL(relative, base + '/').href.substr('file:///'.length);
+    path=decodeURIComponent(path);
     path =path.replace(/\/+/g, "/");
     return path;
 }
@@ -1311,13 +1312,14 @@ function update_bib_keys(data) {
 
 function update_files(files) {
     var args = new Array();
-    args.push({ name: command_table['link'], args: [{ name: 'item', order: '2' }, { name: 'name', order: '1' }] });
-    support_extensions = ['txt','mkv','mp4','MP4'];
+    args.push({ name: command_table['link'], args: [{ name: 'item', order: '2' }, { name: 'file', order: '1' }] });
+   // support_extensions = ['txt','mkv','mp4','MP4'];
+    support_extensions = ['pdf'];
     for (var file of files) {
         var extension = file['name'].substring(file['name'].lastIndexOf(".") + 1);
         //console.log(extension);
         if (!support_extensions.includes(extension)) continue;
-        args.push({ name: command_table['link'], args: ['name', file['name']] });
+        args.push({ name: command_table['link'], args: ['file', file['name']] });
         for (var key in file) {
             if (key == 'location') {
                 key = 'file';
@@ -1377,9 +1379,9 @@ if ("WebSocket" in window) {
     {
         document.getElementById('connection').classList.add('connected');
         // Web Socket 已连接上，使用 send() 方法发送数据
-        ws.send(JSON.stringify({ name: 'getFiles', args: ['./'], status: { id: 'files' } }));
-        //ws.send(JSON.stringify({ name: "getRelations", args: ["root", -1] }));
-        getRelations(start_display_id, ["name", Number(depth)], true);
+        ws.send(JSON.stringify({ name: 'getFiles', args: ['../library_files/'], status: { id: 'files' } }));
+        //getRelations(start_display_id, ["name", Number(depth)], true);
+        getRelations(start_display_id, ["title", Number(depth)], true);
         getRelations('keys', ["item", 1], false);
     };
     ws.onmessage = function (evt) {
