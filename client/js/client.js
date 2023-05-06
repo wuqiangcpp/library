@@ -1164,11 +1164,13 @@ function showContent(div, data, width, height, margin, opt) {
                 var value0 = this.parentNode.getElementsByClassName("link_input0")[0].value;
                 if (value0.trim()) {
                     var command1 = { name: command_table["link"], args: [node.name, value0] };
-                    var command2 = { name: command_table["link"], args: [value1, value0] };
+                    var command2 = { name: command_table["link"], args: [{name:value1,order:'1'}, value0] };
                     var command = { name: 'combo', args: [] };
                     command.args.push(command1);
                     if (value1.trim()) {
                         command.args.push(command2);
+                        var command3 = { name: command_table["link"], args: [{name:'item',order:'2'}, {name:value1,order:'1'}] };
+                        command.args.push(command3);
                     }
                     //console.log(command);
                     ws.send(JSON.stringify(command));
