@@ -147,9 +147,16 @@ void Library::load(const std::string& file) {
 	fin >> data;
 	addToGraph(data);
 }
+void Library::backup(const std::string& file) const{
+	std::ifstream fin(file.c_str(), std::ios::binary);
+	std::ofstream fout((file+"_bk").c_str(), std::ios::binary);
+	Json::Value data;
+	fin >> data;
+	fout << data;
+}
 void Library::save(const std::string& file) const {
+	backup(file);
 	std::ofstream fout(file.c_str(), std::ios::binary);
-
 	fout<<jsonfy(database);
 }
 

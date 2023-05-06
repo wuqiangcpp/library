@@ -10,6 +10,7 @@
 #include <locale>
 #include <codecvt>
 
+
 std::wstring exePath() {
     TCHAR buffer[MAX_PATH] = { 0 };
     GetModuleFileName(NULL, buffer, MAX_PATH);
@@ -41,6 +42,7 @@ inline std::string to_byte_string(const std::wstring& input)
     return converter.to_bytes(input);
 }
 
+
 void  browseToFile(std::string filename)
 {
     //int fail = S_OK; // start as 0
@@ -54,8 +56,14 @@ void  browseToFile(std::string filename)
     //else {
     //    return E_FAIL;
     //}
+    TCHAR  buffer[MAX_PATH] = TEXT("");
+    TCHAR** lppPart = { NULL };
+    GetFullPathName(to_wide_string(filename).c_str(),
+        MAX_PATH,
+        buffer,
+        lppPart);
     std::wstring strSel = L"/select,\"";
-    strSel += to_wide_string(filename);
+    strSel += std::wstring(buffer);
     strSel += L"\"";
     ShellExecute(GetDesktopWindow(), L"open",L"explorer.exe",strSel.c_str(), NULL, SW_SHOWNORMAL);
 }
@@ -97,9 +105,10 @@ bool openFileDialog(LPWSTR szFileName) {
 
 typedef std::basic_string<TCHAR> tstring;
 struct fileInfo {
-    tstring time;
-    tstring name;
-    tstring size;
+    std::string time;
+    std::string name;
+    std::string size;
+    std::string location;
 };
 tstring FileTimeToStr(FILETIME ftWrite)
 {
@@ -137,8 +146,9 @@ tstring FileSizeToStr(long long len)
     else
         return to_wide_string(floatToStr(len / 1024. / 1024. /1024., 2) + " GB");
 }
-void getfiles(tstring inputstr,std::vector<fileInfo>& files)
+std::string getfiles(tstring inputstr,std::vector<fileInfo>& files)
 {
+    //tstring root=exePath();
 	TCHAR szDir[MAX_PATH];
 	tstring seachstr = inputstr + TEXT("\\*");
 	wcscpy_s(szDir, MAX_PATH, seachstr.c_str());
@@ -149,7 +159,7 @@ void getfiles(tstring inputstr,std::vector<fileInfo>& files)
 
 	if (INVALID_HANDLE_VALUE == hFind) {
 		printf("Error FindFirstFile\n");
-		return;
+		return std::string();
 	}
 
 	// List all the files in the directory with some info about them
@@ -167,10 +177,12 @@ void getfiles(tstring inputstr,std::vector<fileInfo>& files)
 			filesize.HighPart = ffd.nFileSizeHigh;
 			//_tprintf(TEXT("  %s   %lld bytes\n"), 
 			 //ffd.cFileName, filesize.QuadPart);
-            tstring time = FileTimeToStr(ffd.ftLastWriteTime);
-            tstring name = tstring(ffd.cFileName);
-            tstring size = FileSizeToStr(filesize.QuadPart);
-            files.push_back(fileInfo{ time,name, size });
+            std::string time = to_byte_string(FileTimeToStr(ffd.ftLastWriteTime));
+            std::string name = to_byte_string(tstring(ffd.cFileName));
+            std::string size = to_byte_string(FileSizeToStr(filesize.QuadPart));
+            std::string location = to_byte_string(inputstr+ TEXT("\\") + ffd.cFileName);
+            fileInfo info{ time,name, size,location };
+            files.push_back(info);
 		}
 	} while (FindNextFile(hFind, &ffd) != 0);
 
@@ -181,4 +193,5 @@ void getfiles(tstring inputstr,std::vector<fileInfo>& files)
 	}
 
 	FindClose(hFind);
+    return to_byte_string(exePath());
 }

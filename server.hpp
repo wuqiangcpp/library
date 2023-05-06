@@ -167,16 +167,25 @@ Json::Value openExternal(const Json::Value& json) {
 Json::Value getFiles(const Json::Value& json) {
     std::vector<fileInfo> files;
     const Json::Value& args = json["args"];
-    getfiles(to_wide_string(args[0].asString()), files);
-    Json::Value return_json=Json::arrayValue;;
+    std::string base=getfiles(to_wide_string(args[0].asString()), files);
+    Json::Value return_json;
+    return_json["files"] = Json::arrayValue;;
     for (int i = 0; i < files.size(); i++) {
+        //std::wcout << files[i].time << std::endl;
         Json::Value node;
-        node["name"] = to_byte_string(files[i].name);
-        node["time"] = to_byte_string(files[i].time);
-        node["size"] = to_byte_string(files[i].size);
-        return_json[i] = node;
+        node["name"] = files[i].name;
+        node["time"] = files[i].time;
+        node["size"] = files[i].size;
+        node["location"] = files[i].location;
+        return_json["files"][i] = node;
     }
+    return_json["base"] = base;
+    return_json["status"] = json["status"];
     return return_json;
+}
+Json::Value test_connection(const Json::Value& json) {
+    std::cout << json<<std::endl;
+    return json;
 }
 void register_handlers() {
     msg_handlers[std::string("getRelations")] = handler_fun(getRelations);
@@ -190,6 +199,7 @@ void register_handlers() {
     msg_handlers[std::string("setInfo")] = handler_fun(setInfo);
     msg_handlers[std::string("openExternal")] = handler_fun(openExternal);
     msg_handlers[std::string("getFiles")] = handler_fun(getFiles);
+    msg_handlers[std::string("test_connection")] = handler_fun(test_connection);
 }
 
 

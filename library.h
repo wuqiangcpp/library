@@ -151,6 +151,7 @@ public:
 
 	void load(const std::string& file= "data.json");
 	void save(const std::string &file= "data.json") const;
+	void backup(const std::string& file = "data.json") const;
 
 	ObjectPtr addObj(const Object& obj);
 	void removeObj(const Object& obj);

@@ -11,8 +11,9 @@ var modifying_nodes = [];
 const start_display_id = "graph0";
 const graph_preview_id = "graph_preview"
 var focused_input;
+var path_base='';
 
-
+var is_app = false;
 
 
 var config = {
@@ -564,8 +565,14 @@ function showGraph_dispatch(id, data) {
     if (id == graph_preview_id)
         opt = { bar_items: false, size_auto: false, click_event: true, default_is_graph: false };
     else
-        opt = { bar_items: true, size_auto: false, click_event: true, default_is_graph: true };
+        opt = { bar_items: true, size_auto: false, click_event: true, default_is_graph: false, info: ['time', 'size'] };
     showGraph(id, data, opt);
+}
+
+function absolute_path(base, relative) {
+    var path = new URL(relative, base + '/').href.substr('file:///'.length);
+    path =path.replace(/\/+/g, "/");
+    return path;
 }
 
 function showGraph(id, data,opt) {
@@ -604,7 +611,13 @@ function showGraph(id, data,opt) {
         if (id == start_display_id) {
             bar.append("div").append("button").attr("id","edit").html('<span class="iconfont icon-edit"></span>')
                 .on("click", function () { change_status(); });
-            bar.append("div").attr('id','connection').html(`<span class="iconfont icon-phone-signal-full"></span>`);
+            bar.append("div").append("button").attr("id", "save").html('<span class="iconfont icon-save"></span>')
+                .on("click", function () { save(); });
+            bar.append("div").attr('id', 'connection').html(`<span class="iconfont icon-phone-signal-full"></span>`);
+
+
+            datalist_html = `<datalist id='id_datalist1'></datalist><datalist id='id_datalist0'></datalist>`
+            bar.append("div").html(datalist_html);
         }
     }
 
@@ -627,8 +640,27 @@ function showGraph(id, data,opt) {
     div.select("table").remove()
     div.select("svg").remove()
     div.select(".control").remove()
-    if (bar.select('input').property('checked'))
+
+    if (data.nodes) {
+        data.nodes.forEach(function (item) {
+            item.getOrder = function () {
+                return item.order ? item.order : 0;
+            }
+            //path rewrite
+            if (item.file) {
+                item.file = absolute_path(path_base, item.file);
+            }
+        })
+    }
+
+
+
+
+
+    if (bar.select('input').property('checked')) {
+        opt.addlinkCommand = true;
         showContent(div, data, width, height, margin, opt);
+    }
     else
         drawSvg(div, data, width, height, margin, opt);
 }
@@ -719,7 +751,7 @@ function collide(node, width, height) {
     };
 };
 
-function showNodeHeader(node, header_height) {
+function showNodeHeader(node, header_height,opt) {
     node.style("opacity", 0.2);
     node.on("mouseover", function () {
         d3.select(this).style("opacity", 1)
@@ -727,62 +759,65 @@ function showNodeHeader(node, header_height) {
         .on("mouseleave", function () {
             d3.select(this).style("opacity", 0.2);
         });
-    var image_size = header_height*0.8;
+    var image_size = header_height * 0.8;
     var padding = 6;
-    node.each(function(item){
+    node.each(function (item) {
         item.header_x = 0;
-        if(item.file){
+        if (item.file) {
             d3.select(this).append("a")
-            .attr("href",item.file)
-            .attr("target", "_blank")
-            //.append("text")
-            //.attr("x", 8)
-            //.attr("y", "-0.5em")
-            //.text(d => d.file ? "link" : "")
-            .append("image")
-            .attr('href', d => {
-                d.header_x += image_size + padding;
-                return 'img/link.svg';
-                //return '#icon-link';
-            })
-            .attr('width', image_size)
-            .attr('height', image_size)
-            .on('mouseover', function () {
-                d3.select(this).style('transform', 'scale(1.1)');
-            })
-            .on('mouseleave', function () {
-                d3.select(this).style('transform', 'scale(1)');
-            })
-            .append("title").text("open file")
+                .attr("href", item.file)
+                .attr("target", "_blank")
+                //.append("text")
+                //.attr("x", 8)
+                //.attr("y", "-0.5em")
+                //.text(d => d.file ? "link" : "")
+                .append("image")
+                .attr('href', d => {
+                    d.header_x += image_size + padding;
+                    return 'img/link.svg';
+                    //return '#icon-link';
+                })
+                .attr('width', image_size)
+                .attr('height', image_size)
+                .on('mouseover', function () {
+                    d3.select(this).style('transform', 'scale(1.1)');
+                })
+                .on('mouseleave', function () {
+                    d3.select(this).style('transform', 'scale(1)');
+                })
+                .append("title").text("open file")
         }
     })
 
 
-    node.each(function(item){
-        if(item.file){
+    node.each(function (item) {
+        if (item.file) {
             d3.select(this).append("image")
-            .attr('href', 'img/folder.svg')
-            //.attr('href', '#icon-copy')
-            .attr('width', image_size)
-            .attr('height', image_size)
-            //.append('text')
-            .attr("x", d => {
-                var header_x = d.header_x;
-                d.header_x += image_size + padding;
-                return header_x;
-            })
-            //.attr("y", -20)
-            .on('click', function () {
-                navigator.clipboard.writeText(item.file);
-                ws.send(JSON.stringify({ name: 'openExternal', args: [item.file] }));
-            })
-            .on('mouseover', function () {
-                d3.select(this).style('transform', 'scale(1.1)');
-            })
-            .on('mouseleave', function () {
-                d3.select(this).style('transform', 'scale(1)');
-            })
-            .append("title").text("open external")
+                .attr('href', 'img/folder.svg')
+                //.attr('href', '#icon-copy')
+                .attr('width', image_size)
+                .attr('height', image_size)
+                //.append('text')
+                .attr("x", d => {
+                    var header_x = d.header_x;
+                    d.header_x += image_size + padding;
+                    return header_x;
+                })
+                //.attr("y", -20)
+                .on('click', function () {
+                    navigator.clipboard.writeText(item.file);
+                    if (is_app)
+                        window.electronAPI.showInFolder(item.file);
+                    else
+                        ws.send(JSON.stringify({ name: 'openExternal', args: [item.file] }));
+                })
+                .on('mouseover', function () {
+                    d3.select(this).style('transform', 'scale(1.1)');
+                })
+                .on('mouseleave', function () {
+                    d3.select(this).style('transform', 'scale(1)');
+                })
+                .append("title").text("open external")
         }
     })
 
@@ -798,7 +833,7 @@ function showNodeHeader(node, header_height) {
             return header_x;
         })
         //.attr("y", -20)
-        .on('click', function (d,node) {
+        .on('click', function (d, node) {
             //var node = d3.select(this).data()[0];
             navigator.clipboard.writeText(node.name);
             if (status == 'modifying') {
@@ -806,12 +841,55 @@ function showNodeHeader(node, header_height) {
             }
         })
         .on('mouseover', function () {
-            d3.select(this).style('transform','scale(1.1)');
+            d3.select(this).style('transform', 'scale(1.1)');
         })
         .on('mouseleave', function () {
             d3.select(this).style('transform', 'scale(1)');
         })
         .append("title").text("copy to clipboard")
+
+    if (opt.addlinkCommand) {
+        node.each(function (item) {
+            if (item.getOrder() == 0) {
+                d3.select(this).append("image")
+                    .attr('href', 'img/arrow_right.svg')
+                    //.attr('href', '#icon-copy')
+                    .attr('class', 'link_command')
+                    .attr('width', image_size)
+                    .attr('height', image_size)
+                    //.append('text')
+                    .attr("x", d => {
+                        var header_x = d.header_x;
+                        d.header_x += image_size + padding;
+                        return header_x;
+                    })
+                    //.attr("y", -20)
+                    .on('click', function (d, node) {
+                        var node_link = d3.select(this.parentNode.parentNode).select('.link');
+                        if (node_link.style('display') == 'none') {
+                            d3.selectAll('.link').style('display', 'none')
+                            document.getElementById(`id_datalist0`).innerHTML = ``;
+                            d3.selectAll('.link_command').attr('href', 'img/arrow_right.svg');
+
+                            node_link.style('display', 'block');
+                            d3.select(this).attr('href', 'img/arrow_down.svg');
+                            getRelations('datalist1', ["item", 1], false);
+                        }
+                        else {
+                            node_link.style('display', 'none');
+                            d3.select(this).attr('href', 'img/arrow_right.svg');
+                        }
+                    })
+                    .on('mouseover', function () {
+                        d3.select(this).style('transform', 'scale(1.1)');
+                    })
+                    .on('mouseleave', function () {
+                        d3.select(this).style('transform', 'scale(1)');
+                    })
+                    .append("title").text("link")
+            }
+        })
+    }
 }
 
 function drawSvg(div, data, width, height, margin, opt) {
@@ -871,7 +949,7 @@ function drawSvg(div, data, width, height, margin, opt) {
         .attr("x", 8)
         .attr("y", "-1.5em")
 
-    showNodeHeader(node_header,header_height);
+    showNodeHeader(node_header,header_height,opt);
 
 
     node.append("g").attr("class", "text").append("text")
@@ -1005,11 +1083,6 @@ function drawSvg(div, data, width, height, margin, opt) {
 }
 function graph2Table(data) {
     content = new Map();
-    data.nodes.forEach(function (item) {
-        item.getOrder = function () {
-            return item.order ? item.order : 0;
-        }
-    })
     if (data.links.length == 0) {
         return content;
     }
@@ -1060,17 +1133,61 @@ function showContent(div, data, width, height, margin, opt) {
             .on("click", function () { click(this); })
         //.on("dblclick", function () { dblclick(this); });
         //mouse_click_dblclick(row_a, click, dblclick);
-        row_a.append("text").text(item_key.name);
-        row_a = row.append("td").append("dl");
+        row_a.append("div").attr('class', 'text').append("text").text(item_key.name)
+            .attr("class", "order" + item_key.getOrder());
 
-        var node=row_a.selectAll("dt")
+        var node = row.append("td").append("dl").selectAll("dt")
             .data(value)
             .join("dt")
         var header_height = 14;
-        var node_header = node.append("svg").attr('width', 80).attr('height', header_height);
-        showNodeHeader(node_header, header_height);
+        var node_header = node.append("svg").attr('width', 100).attr('height', header_height);
+        showNodeHeader(node_header, header_height,opt);
+
+        var node_link = node.append("div").attr('class', 'link').style('display', 'none');
+        node_link.append('input').attr('type', 'search').attr('list', 'id_datalist1')
+            .attr('class', 'link_input1').attr('value', 'tag')
+            //.on('blur', function (d, node) {
+            //    getRelations('datalist0', [this.value, 1], false);
+            //});
+        node_link.append('label').text('>').attr('style','color:gray');
+        node_link.append('input').attr('type', 'search').attr('list', 'id_datalist0')
+            .attr('class', 'link_input0')
+            .on('mouseover', function (d, node) {
+                var value = this.parentNode.getElementsByClassName("link_input1")[0].value;
+                getRelations('datalist0', [value, 1], false);
+
+            });
+        node_link.append('input').attr('type', 'submit').attr('value', '✔')
+            .on('click', function (d,node) {
+                var value1 = this.parentNode.getElementsByClassName("link_input1")[0].value;
+                var value0 = this.parentNode.getElementsByClassName("link_input0")[0].value;
+                if (value0.trim()) {
+                    var command1 = { name: command_table["link"], args: [node.name, value0] };
+                    var command2 = { name: command_table["link"], args: [value1, value0] };
+                    var command = { name: 'combo', args: [] };
+                    command.args.push(command1);
+                    if (value1.trim()) {
+                        command.args.push(command2);
+                    }
+                    //console.log(command);
+                    ws.send(JSON.stringify(command));
+                    d3.select(this).attr('style', 'color:green');
+                    var self = this;
+                    setTimeout(function () { d3.select(self).attr('style', '');}, 2000);
+                }
+            });
+
         node.append("div").attr('class', 'text')
-            .append("text").text(d => d.name);
+            .append("text").text(d => d.name).attr("class", d => "order" + d.getOrder());
+
+        for (var key of opt.info) {
+            node.select(".text").append("text").attr('class', 'info').text(function (d) {
+                if (d[key])
+                    return "\u00A0".repeat(4) + d[key];
+                else
+                    return "";
+            });
+        }
 
         if (opt.click_event)
             node.selectAll(".text").on("click", function () { click(this); })
@@ -1126,12 +1243,12 @@ function save_focused() {
     focused_input=document.activeElement;
 }
 
-function add_new_info(self) {
+function add_new_info(self,key='',value='') {
     var d = self.closest('.form_new_info');
     var html = d.outerHTML;
     html = `<div class='info right'>` +
-        `<div class='left'><input  type="text" value="" placeholder="infoKey" onfocus='save_focused()'/></div>` +
-        `<div class='right' ><input type="text" value="" placeholder="infoValue" onfocus='save_focused()'/></div>` +
+        `<div class='left'><input  type="text" value="${key}" placeholder="infoKey" onfocus='save_focused()'/></div>` +
+        `<div class='right' ><input type="text" value="${value}" placeholder="infoValue" onfocus='save_focused()'/></div>` +
         `</div>` + html;
     d.outerHTML = html;
 }
@@ -1192,6 +1309,29 @@ function update_bib_keys(data) {
     }
 }
 
+function update_files(files) {
+    var args = new Array();
+    args.push({ name: command_table['link'], args: [{ name: 'item', order: '2' }, { name: 'name', order: '1' }] });
+    support_extensions = ['txt','mkv','mp4','MP4'];
+    for (var file of files) {
+        var extension = file['name'].substring(file['name'].lastIndexOf(".") + 1);
+        //console.log(extension);
+        if (!support_extensions.includes(extension)) continue;
+        args.push({ name: command_table['link'], args: ['name', file['name']] });
+        for (var key in file) {
+            if (key == 'location') {
+                key = 'file';
+                file[key] = file['location'];
+            }
+            args.push({ name: command_table['setInfo'], args: [file['name'], key, file[key]] });
+        }
+    }
+    if (args.length) {
+        ws.send(JSON.stringify({ name: 'combo', args: args }));
+        //console.log(JSON.stringify({ name: 'combo', args: args }));
+        updateGraph();
+    }
+}
 function handle_msg(dataJson) {
     //console.log(dataJson);
     var id = dataJson.status.id;
@@ -1202,13 +1342,31 @@ function handle_msg(dataJson) {
         //show_modify_form(data);
         update_data('modify', data);
     }
-    if (id != 'keys') {
+    else if (id == 'keys') {
+        update_bib_keys(data);
+    }
+    else if (id == 'files') {
+//        console.log(dataJson);
+        path_base = dataJson['base'];
+        update_files(dataJson['files']);
+    }
+    else if (id.includes('datalist')) {
+        var options_html = ``;
+        var nodes = data.nodes;
+        if (nodes.length != 0) {
+            nodes.forEach(d => {
+                if (!d.order) d.order = 0;
+                if (d.name != dataJson.status.center && d.name != 'item') {
+                    options_html = options_html + `<option value='${d.name}'></option>`
+                }
+            });
+        }
+        document.getElementById(`id_` + id).innerHTML = options_html;
+    }
+    else {
         showGraph_dispatch(id, data);
         update_data(id, data);
         //document.getElementById("show").innerHTML = received_msg;
-    }
-    else {
-        update_bib_keys(data);
     }
 }
 
@@ -1219,8 +1377,9 @@ if ("WebSocket" in window) {
     {
         document.getElementById('connection').classList.add('connected');
         // Web Socket 已连接上，使用 send() 方法发送数据
+        ws.send(JSON.stringify({ name: 'getFiles', args: ['./'], status: { id: 'files' } }));
         //ws.send(JSON.stringify({ name: "getRelations", args: ["root", -1] }));
-        getRelations(start_display_id, ["title", Number(depth)], true);
+        getRelations(start_display_id, ["name", Number(depth)], true);
         getRelations('keys', ["item", 1], false);
     };
     ws.onmessage = function (evt) {
@@ -1244,6 +1403,7 @@ if ("WebSocket" in window) {
         //alert("连接已关闭...");
         document.getElementById('connection').classList.remove('connected');
         document.getElementById('connection').classList.add('disconnected');
+        ws.send(JSON.stringify({ name: 'test_connection', args: ['test']}));
         }
 }
 else{
@@ -1367,7 +1527,7 @@ function gen_code_bib(bib_content, bib_keys, result) {
         }
         if (entry[center_key]) {
             for (var key in entry['info']) {
-                result.push({ name: 'setInfo', args: [entry[center_key], key, entry['info'][key]] });
+                result.push({ name: command_table['setInfo'], args: [entry[center_key], key, entry['info'][key]] });
             }
         }
     }
@@ -1611,12 +1771,21 @@ function save(){
    ws.send(JSON.stringify({ name: 'save', args:[]}));
 }
 
+async function chooseFile() {
+    const filePath = await window.electronAPI.openFile();
+    //insert_text(focused_input, filePath );
+    const info_item = focused_input.closest('.form_entry').querySelector('.form_new_info');
+    add_new_info(info_item, "file", filePath);
+}
+
 function show_modify_simple() {
     var { form_html } = load_modify_status();
+    var chooseFile_html = ``;
+    if (is_app)
+        chooseFile_html = `<button id='chooseFile' onclick='chooseFile()'>chooseFile</button>`;
     document.getElementById('modify_simple').innerHTML = `<div class='modify_simple_menu'>
 <button id='frombib_form' onclick='frombib_form()'>frombib</button>
-<button id='save' onclick='save()'>save</button>
-</div>
+<button id='save' onclick='save()'>save</button>${ chooseFile_html }</div>
 <div id='modify_form' class='modify_form'></div>
 <input type = "button" value = 'clear' onclick='clear_form()'>
 <input type = "button" value = 'confirm' onclick='confirm_form()' >`;

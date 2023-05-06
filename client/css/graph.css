@@ -13,15 +13,17 @@ g:hover > circle {
     stroke: blue;
 }
 
-g> .order0{
-    fill:black;
-}
-g > .order1 {
+.order0 {
     fill: black;
 }
-g > .order2 {
+.order1 {
     fill: black;
 }
+.order2 {
+    fill: black;
+}
+
+
 
 g > text:hover {
     fill: red;
@@ -156,6 +158,22 @@ overflow-y: auto;
     opacity: 1;
 }
 
+.text:hover{
+    color:red;
+}
+.link > input[type=submit] {
+    border: none;
+    background:none;
+    font-size:14pt;
+}
+.link > input[type=submit]:hover {
+    color:red;
+}
+.link > input[type=search] {
+    width: 180px;
+    height:25px;
+}
+
 .graph_content {
     /*    margin: 4px, 4px;
     padding: 4px;*/
@@ -180,7 +198,9 @@ overflow-y: auto;
 /*        overflow: auto;*/
 /*        background-color: white;*/
     }
-
+.info {
+    color: gray;
+}
 .modify {
     overflow: auto;
     /*    background-color: white;*/
