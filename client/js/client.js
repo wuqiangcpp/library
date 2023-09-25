@@ -12,9 +12,9 @@ const start_display_id = "graph0";
 const graph_preview_id = "graph_preview"
 var focused_input;
 var path_base='';
+var archived_files;
 
 var is_app = false;
-
 
 var config = {
     settings: {
@@ -565,15 +565,19 @@ function showGraph_dispatch(id, data) {
     if (id == graph_preview_id)
         opt = { bar_items: false, size_auto: false, click_event: true, default_is_graph: false };
     else
-        opt = { bar_items: true, size_auto: false, click_event: true, default_is_graph: false, info: ['time', 'size'] };
+        opt = { bar_items: true, size_auto: false, click_event: true, default_is_graph: false, info: ['time', 'size','archived'] };
     showGraph(id, data, opt);
 }
 
 function absolute_path(base, relative) {
+  if(relative[0]=='.'){
     var path = new URL(relative, base + '/').href.substr('file:///'.length);
     path=decodeURIComponent(path);
     path =path.replace(/\/+/g, "/");
     return path;
+  }
+  else
+      return relative;
 }
 
 function showGraph(id, data,opt) {
@@ -612,7 +616,7 @@ function showGraph(id, data,opt) {
         if (id == start_display_id) {
             bar.append("div").append("button").attr("id","edit").html('<span class="iconfont icon-edit"></span>')
                 .on("click", function () { change_status(); });
-            bar.append("div").append("button").attr("id", "save").html('<span class="iconfont icon-save"></span>')
+            bar.append("div").append("button").html('<span class="iconfont icon-save"></span>')
                 .on("click", function () { save(); });
             bar.append("div").attr('id', 'connection').html(`<span class="iconfont icon-phone-signal-full"></span>`);
 
@@ -650,6 +654,9 @@ function showGraph(id, data,opt) {
             //path rewrite
             if (item.file) {
                 item.file = absolute_path(path_base, item.file);
+                if(!archived_files.has(item.file)){
+                item.archived='*';
+                }
             }
         })
     }
@@ -746,8 +753,8 @@ function collide(node, width, height) {
                 //console.log("<");
             }
         }
-        node.x = clamp(node.x, padding, width - node.width);
-        node.y = clamp(node.y, padding, height - node.height);
+        node.x = clamp(node.x, padding+10, width - node.width);
+        node.y = clamp(node.y, padding+30, height - node.height);
         return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
     };
 };
@@ -1316,7 +1323,7 @@ function update_files(files) {
     var args = new Array();
     args.push({ name: command_table['link'], args: [{ name: 'item', order: '2' }, { name: 'file', order: '1' }] });
    // support_extensions = ['txt','mkv','mp4','MP4'];
-    support_extensions = ['pdf'];
+    support_extensions = ['pdf','djvu'];
     for (var file of files) {
         var extension = file['name'].substring(file['name'].lastIndexOf(".") + 1);
         //console.log(extension);
@@ -1341,6 +1348,9 @@ function handle_msg(dataJson) {
     var id = dataJson.status.id;
     var data = { nodes: dataJson.nodes, links: dataJson.links };
     //console.log(data);
+    if(dataJson.status.center=='title'){
+       archived_files=new Set(data.nodes.map(item=>item.file).filter(item=>item).map(item=>absolute_path(path_base,item)));
+    }
     if (id == graph_preview_id) {
         data['center'] = dataJson.status.center;
         //show_modify_form(data);
@@ -1382,7 +1392,6 @@ if ("WebSocket" in window) {
         document.getElementById('connection').classList.add('connected');
         // Web Socket 已连接上，使用 send() 方法发送数据
         ws.send(JSON.stringify({ name: 'getFiles', args: ['../library_files/'], status: { id: 'files' } }));
-        //getRelations(start_display_id, ["name", Number(depth)], true);
         getRelations(start_display_id, ["title", Number(depth)], true);
         getRelations('keys', ["item", 1], false);
     };
